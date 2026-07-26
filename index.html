@@ -398,7 +398,9 @@
   <div class="subtitle">Revenue &amp; Profit Calculator — model the full split before the doors open.</div>
   <div class="download-bar">
     <button class="download-btn" onclick="window.print()">↓ Download PDF Report</button>
+    <button class="download-btn" id="update-btn" onclick="saveCalculatorState()" style="margin-left:10px;">💾 Update Live Calculator</button>
   </div>
+  <div id="update-status" style="text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:rgba(244,239,228,0.5);margin-top:10px;"></div>
 </div>
 
 <div class="wrap">
@@ -648,6 +650,16 @@
       <h2>Results Summary</h2>
       <div class="desc">Every payout, with individual splits shown where a pool is divided among more than one recipient.</div>
       <div id="results-summary"></div>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);">
+        <button class="download-btn" id="save-report-btn" onclick="saveReport()">📄 Save Report to Sheets</button>
+        <span id="report-save-status" style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(244,239,228,0.5);margin-left:10px;"></span>
+      </div>
+    </div>
+
+    <div class="panel full">
+      <h2>Saved Reports</h2>
+      <div class="desc">Previously saved snapshots, most recent first — pulled live from your Report Archive sheet.</div>
+      <div id="report-list"></div>
     </div>
 
     <div class="footnote">
@@ -848,6 +860,143 @@ document.addEventListener('click', (e) => {
     if(box) box.style.display = 'none';
   }
 });
+
+/* ============================================================
+   LIVE SHARED STATE — "Update Live Calculator" button
+   ============================================================
+   Saves every field on the page to Apps Script (via PropertiesService),
+   and loads it back on page load so every visitor sees the same
+   latest numbers instead of the hardcoded starting defaults.
+   ============================================================ */
+const RAW_FIELD_IDS = [
+  't-fee-pct','s-pif-pct','s-np-pct','s-kickback-price','s-kickback-count',
+  'v-t1-rate','v-t2-rate','v-t3-rate','v-revshare-count','v-revshare-sales',
+  'v-revshare-pct','v-sponsor-total','s-np-vendor-pct','s-epf-pct'
+];
+
+function serializeFullState(){
+  const raw = {};
+  RAW_FIELD_IDS.forEach(id => { const el = document.getElementById(id); if(el) raw[id] = el.value; });
+  const fairnessEl = document.getElementById('fairness-toggle');
+  raw['fairness-toggle'] = fairnessEl ? fairnessEl.checked : false;
+  return { tierRows, promoRows, npPartnerRows, splitRows, costRows, vendorEntries, pracEntries, raw };
+}
+
+function applyFullState(state){
+  if(!state) return;
+  if(state.tierRows) tierRows = state.tierRows;
+  if(state.promoRows) promoRows = state.promoRows;
+  if(state.npPartnerRows) npPartnerRows = state.npPartnerRows;
+  if(state.splitRows) splitRows = state.splitRows;
+  if(state.costRows) costRows = state.costRows;
+  if(state.vendorEntries) vendorEntries = state.vendorEntries;
+  if(state.pracEntries) pracEntries = state.pracEntries;
+  if(state.raw){
+    Object.keys(state.raw).forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(el.type === 'checkbox') el.checked = state.raw[id];
+      else el.value = state.raw[id];
+    });
+  }
+  renderTierRows(); renderPromoRows(); renderNpPartnerRows(); renderSplitRows(); renderCostRows();
+  renderVendorEntryRows(); renderPracEntryRows();
+  calc();
+}
+
+async function saveCalculatorState(){
+  const btn = document.getElementById('update-btn');
+  const statusEl = document.getElementById('update-status');
+  const name = prompt('Your name or initials (shown as who last updated this):', '') || 'Unknown';
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        'form-name': 'calculator-state',
+        state: JSON.stringify(serializeFullState()),
+        updatedBy: name
+      })
+    });
+    statusEl.textContent = `✓ Saved by ${name} · ${new Date().toLocaleString()} — this is now what everyone sees on load.`;
+  } catch(err){
+    statusEl.textContent = '⚠ Save failed — check your connection and try again.';
+    console.error('saveCalculatorState failed:', err);
+  }
+  btn.disabled = false; btn.textContent = '💾 Update Live Calculator';
+}
+
+async function loadCalculatorState(){
+  const statusEl = document.getElementById('update-status');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=calculatorState');
+    const data = await res.json();
+    if(data.state){
+      applyFullState(JSON.parse(data.state));
+      if(data.updatedAt) statusEl.textContent = `Loaded saved calculator · last updated by ${data.updatedBy || 'someone'} on ${new Date(data.updatedAt).toLocaleString()}`;
+    }
+  } catch(err){
+    console.error('Could not load saved calculator state — showing defaults instead:', err);
+  }
+}
+
+/* ============================================================
+   REPORT ARCHIVE — "Save Report to Sheets" button
+   ============================================================ */
+async function saveReport(){
+  const name = prompt('Name this report (e.g. "August 15 — Pre-Event Projection"):', '');
+  if(!name) return;
+  const btn = document.getElementById('save-report-btn');
+  const statusEl = document.getElementById('report-save-status');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const summary = window._lastCalcSummary || {};
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        'form-name': 'calculator-report',
+        reportName: name,
+        summary: summary,
+        fullReportJson: JSON.stringify(serializeFullState())
+      })
+    });
+    statusEl.textContent = `✓ Saved "${name}" to your Report Archive sheet.`;
+    loadReportList();
+  } catch(err){
+    statusEl.textContent = '⚠ Save failed — check your connection and try again.';
+    console.error('saveReport failed:', err);
+  }
+  btn.disabled = false; btn.textContent = '📄 Save Report to Sheets';
+}
+
+async function loadReportList(){
+  const el = document.getElementById('report-list');
+  if(!el) return;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=reportList');
+    const data = await res.json();
+    const reports = data.reports || [];
+    if(reports.length === 0){
+      el.innerHTML = '<div class="search-empty">No saved reports yet — use "Save Report to Sheets" above to create the first one.</div>';
+      return;
+    }
+    el.innerHTML = reports.map(r => `
+      <div class="entry-row">
+        <div class="entry-row-top">
+          <div>
+            <div class="entry-row-name">${r.name}</div>
+            <div class="entry-row-meta">${r.savedAt} · Gross ${fmt(Number(r.totalGross)||0)} · Net ${fmt(Number(r.totalNet)||0)} · ${r.marginPct}% margin · ${fmt(Number(r.perPrac)||0)}/practitioner</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch(err){
+    el.innerHTML = '<div class="search-empty">⚠ Could not load saved reports.</div>';
+    console.error('loadReportList failed:', err);
+  }
+}
 
 const scenarios = {
   conservative: { mult:0.6,  v1:6,  v2:2,  v3:1,  rsCount:0, sponsorTotal:0   },
@@ -1106,6 +1255,11 @@ function calc(){
   document.getElementById('h-floor').textContent = perPrac>=150 ? '✓ above $150 floor' : (practitionerPool<0 ? '⚠ pool went negative' : '⚠ below $150 floor');
   document.getElementById('h-np').textContent = fmt(perNpPartner);
   document.getElementById('h-np-count').textContent = `across ${npPartnerCount} partner${npPartnerCount>1?'s':''}`;
+
+  window._lastCalcSummary = {
+    totalGross: totalGrossCollected, totalNet: totalNetSensorium,
+    marginPct: marginPct.toFixed(1), perPrac: perPrac, perNpPartner: perNpPartner
+  };
 
   /* ---------------- SECTION TOTALS ---------------- */
   setTotal('tier-total', `Total ticket tiers (gross) · ${totalTickets} tickets`, grossTicket);
@@ -1407,6 +1561,8 @@ renderCostRows();
 renderVendorEntryRows();
 renderPracEntryRows();
 fetchDirectory();
+loadCalculatorState();
+loadReportList();
 calc();
 </script>
 
