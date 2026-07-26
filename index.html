@@ -512,6 +512,15 @@
           <input type="text" id="prac-search-input" placeholder="Search practitioner profiles…" style="width:100%;text-align:left;font-family:'Inter',sans-serif;" oninput="renderPracSearchResults()" onfocus="renderPracSearchResults()">
           <div id="prac-search-results" style="display:none;position:absolute;left:0;right:0;top:100%;background:#241a30;border:1px solid var(--gold);border-radius:8px;max-height:220px;overflow-y:auto;z-index:10;margin-top:4px;"></div>
         </div>
+        <button type="button" class="download-btn" style="padding:6px 14px;font-size:11px;margin-bottom:10px;" onclick="toggleManualPracForm()">+ Add Manually</button>
+        <div id="manual-prac-form" style="display:none;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px;">
+          <div class="dyn-row"><input type="text" id="mp-name" placeholder="Practitioner name" style="flex:1"></div>
+          <div class="dyn-row">
+            <input type="text" id="mp-type" placeholder="Practitioner type" style="flex:1">
+            <input type="text" id="mp-modality" placeholder="Primary modality" style="flex:1">
+          </div>
+          <div class="dyn-row"><button type="button" class="download-btn" style="padding:8px 18px;" onclick="addManualPrac()">Add</button></div>
+        </div>
         <div id="prac-entry-rows"></div>
         <div class="section-total" id="prac-count-total"><span class="lbl">Teaching activators</span><span class="amt">0</span></div>
       </div>
@@ -561,6 +570,22 @@
         <div style="position:relative;margin-bottom:10px;">
           <input type="text" id="vendor-search-input" placeholder="Search vendor profiles…" style="width:100%;text-align:left;font-family:'Inter',sans-serif;" oninput="renderVendorSearchResults()" onfocus="renderVendorSearchResults()">
           <div id="vendor-search-results" style="display:none;position:absolute;left:0;right:0;top:100%;background:#241a30;border:1px solid var(--gold);border-radius:8px;max-height:220px;overflow-y:auto;z-index:10;margin-top:4px;"></div>
+        </div>
+        <button type="button" class="download-btn" style="padding:6px 14px;font-size:11px;margin-bottom:10px;" onclick="toggleManualVendorForm()">+ Add Manually</button>
+        <div id="manual-vendor-form" style="display:none;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px;">
+          <div class="dyn-row"><input type="text" id="mv-name" placeholder="Vendor name" style="flex:2"></div>
+          <div class="dyn-row">
+            <select id="mv-tier" style="flex:1">
+              <option value="Tier 1 · Community Presence">Tier 1</option>
+              <option value="Tier 2 · Sensorium Visibility">Tier 2</option>
+              <option value="Tier 3 · Featured Partner">Tier 3</option>
+            </select>
+            <input type="text" id="mv-type" placeholder="Vendor type" style="flex:1">
+          </div>
+          <div class="dyn-row">
+            <input type="text" id="mv-booth" placeholder="Booth size" style="flex:1">
+            <button type="button" class="download-btn" style="padding:8px 18px;" onclick="addManualVendor()">Add</button>
+          </div>
         </div>
         <div id="vendor-entry-rows"></div>
         <div class="section-total" id="vendor-tier-total"><span class="lbl">Total vendor tiers</span><span class="amt">$0</span></div>
@@ -775,6 +800,26 @@ function addVendorEntry(profile){
 }
 function removeVendorEntry(i){ vendorEntries.splice(i,1); renderVendorEntryRows(); calc(); }
 function updateVendorEntryRate(i, val){ vendorEntries[i].rate = parseFloat(val) || 0; calc(); }
+
+function toggleManualVendorForm(){
+  const el = document.getElementById('manual-vendor-form');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function addManualVendor(){
+  const name = document.getElementById('mv-name').value.trim();
+  if(!name){ alert('Enter a vendor name.'); return; }
+  const tier = document.getElementById('mv-tier').value;
+  const vendorType = document.getElementById('mv-type').value.trim();
+  const boothSize = document.getElementById('mv-booth').value.trim();
+  const rateFn = TIER_DEFAULT_RATE[tier];
+  const rate = rateFn ? rateFn() : 0;
+  vendorEntries.push({ name, tier, vendorType, boothSize, rate });
+  document.getElementById('mv-name').value = '';
+  document.getElementById('mv-type').value = '';
+  document.getElementById('mv-booth').value = '';
+  document.getElementById('manual-vendor-form').style.display = 'none';
+  renderVendorEntryRows(); calc();
+}
 function renderVendorEntryRows(){
   const el = document.getElementById('vendor-entry-rows');
   if(vendorEntries.length === 0){
@@ -830,6 +875,23 @@ function addPracEntry(profile){
   renderPracEntryRows(); calc();
 }
 function removePracEntry(i){ pracEntries.splice(i,1); renderPracEntryRows(); calc(); }
+
+function toggleManualPracForm(){
+  const el = document.getElementById('manual-prac-form');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function addManualPrac(){
+  const name = document.getElementById('mp-name').value.trim();
+  if(!name){ alert('Enter a practitioner name.'); return; }
+  const practitionerType = document.getElementById('mp-type').value.trim();
+  const primaryModality = document.getElementById('mp-modality').value.trim();
+  pracEntries.push({ name, practitionerType, primaryModality });
+  document.getElementById('mp-name').value = '';
+  document.getElementById('mp-type').value = '';
+  document.getElementById('mp-modality').value = '';
+  document.getElementById('manual-prac-form').style.display = 'none';
+  renderPracEntryRows(); calc();
+}
 function renderPracEntryRows(){
   const el = document.getElementById('prac-entry-rows');
   if(pracEntries.length === 0){
