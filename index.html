@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sensorium — Revenue & Profit Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root{
+    --purple-deep:#2e1a47;
+    --purple-mid:#4a2d6b;
+    --gold:#c9a24b;
+    --gold-bright:#e6c675;
+    --cream:#f4efe4;
+    --terracotta:#b1583c;
+    --ink:#1a1420;
+    --line:rgba(201,162,75,0.25);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .hero{
+    background:linear-gradient(135deg, var(--purple-deep) 0%, var(--purple-mid) 55%, var(--terracotta) 130%);
+    padding:56px 24px 44px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at top, rgba(230,198,117,0.18), transparent 60%);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    letter-spacing:0.28em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--gold-bright);
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:'Cinzel Decorative', serif;
+    font-weight:700;
+    font-size:clamp(32px,6vw,54px);
+    margin:0 0 8px;
+    letter-spacing:0.03em;
+    color:var(--cream);
+    text-shadow:0 2px 30px rgba(230,198,117,0.25);
+  }
+  .subtitle{
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:20px;
+    color:rgba(244,239,228,0.75);
+    max-width:600px;
+    margin:0 auto;
+  }
+  .download-bar{
+    display:flex;
+    justify-content:center;
+    margin-top:22px;
+  }
+  .download-btn{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.05em;
+    color:var(--ink);
+    background:var(--gold);
+    border:none;
+    border-radius:999px;
+    padding:11px 22px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .download-btn:hover{background:var(--gold-bright);}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 20px 100px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  @media(max-width:920px){.grid{grid-template-columns:1fr;}}
+
+  .panel{
+    background:linear-gradient(180deg, rgba(74,45,107,0.35), rgba(26,20,32,0.6));
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px 26px 22px;
+  }
+  .panel.full{grid-column:1/-1;}
+  .panel h2{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:600;
+    font-size:24px;
+    margin:0 0 4px;
+    color:var(--gold-bright);
+  }
+  .panel .desc{
+    font-size:13px;
+    color:rgba(244,239,228,0.55);
+    margin-bottom:18px;
+  }
+  .scenario-row{display:flex;flex-wrap:wrap;gap:8px;}
+  .scenario-btn{
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:999px;
+    border:1px solid var(--gold);
+    background:transparent;
+    color:var(--gold-bright);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .scenario-btn:hover{background:rgba(201,162,75,0.15);}
+  .scenario-btn.active{background:var(--gold);color:var(--ink);}
+
+  .field-group{margin-bottom:16px;}
+  .field-group-title{
+    font-family:'Space Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:10px;
+    padding-bottom:6px;
+    border-bottom:1px dashed var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .field{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .field label{
+    font-size:13.5px;
+    color:rgba(244,239,228,0.85);
+    flex:1;
+  }
+  .field .price-tag{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:rgba(244,239,228,0.4);
+    margin-left:6px;
+  }
+  .mini-label{font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(244,239,228,0.35);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.06em;}
+
+  input[type=number], input[type=text]{
+    background:rgba(0,0,0,0.25);
+    border:1px solid var(--line);
+    border-radius:7px;
+    color:var(--cream);
+    font-family:'Space Mono',monospace;
+    font-size:13.5px;
+    padding:7px 8px;
+    text-align:right;
+  }
+  input[type=text]{text-align:left;font-family:'Inter',sans-serif;}
+  input[type=number]{width:66px;}
+  input:focus{outline:none;border-color:var(--gold);}
+  input:disabled{opacity:0.4;cursor:not-allowed;}
+  .dollar-prefix{font-family:'Space Mono',monospace;color:rgba(244,239,228,0.4);margin-right:-6px;}
+
+  .icon-btn{
+    background:none;
+    border:1px solid var(--line);
+    color:rgba(244,239,228,0.5);
+    border-radius:6px;
+    width:26px;height:26px;
+    cursor:pointer;
+    font-size:14px;
+    line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .15s ease;
+    flex-shrink:0;
+  }
+  .icon-btn:hover{border-color:var(--terracotta);color:var(--terracotta);}
+  .add-btn{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:var(--gold-bright);
+    background:none;
+    border:1px dashed var(--gold);
+    border-radius:7px;
+    padding:5px 10px;
+    cursor:pointer;
+  }
+  .add-btn:hover{background:rgba(201,162,75,0.12);}
+
+  .dyn-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .dyn-row input[type=text]{flex:1;min-width:0;}
+  .dyn-row .col{display:flex;flex-direction:column;align-items:flex-end;}
+
+  .name-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .name-row input[type=text]{flex:1;}
+
+  .split-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .split-row input[type=text]{flex:1;}
+  .split-row .pct-wrap{display:flex;align-items:center;gap:3px;}
+
+  .cost-header, .cost-row{
+    display:grid;
+    grid-template-columns:1fr 82px 46px 46px 26px;
+    gap:8px;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  .cost-header{
+    font-family:'Space Mono',monospace;
+    font-size:9.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:rgba(244,239,228,0.35);
+    margin-bottom:10px;
+  }
+  .cost-row input[type=text]{width:100%;}
+  .cost-row input[type=number]{width:100%;}
+  .chk-wrap{display:flex;justify-content:center;}
+  .chk-wrap input[type=checkbox]{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;}
+
+  .section-total{
+    margin-top:4px;
+    padding-top:10px;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:'Space Mono',monospace;
+    font-size:12.5px;
+    color:rgba(244,239,228,0.7);
+  }
+  .section-total .amt{font-weight:700;color:var(--gold-bright);font-size:14px;}
+  .section-total.emphasize{
+    background:rgba(201,162,75,0.08);
+    border-top:1px solid var(--gold);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-top:10px;
+  }
+  .section-total.emphasize .amt{font-size:16px;}
+  .section-total .lbl{opacity:0.85;}
+
+  .divider-label{
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:22px 0 4px;
+  }
+  .divider-label:first-child{margin-top:0;}
+
+  .waterfall{margin-top:6px;}
+  .wf-row{
+    display:grid;
+    grid-template-columns:26px 1fr auto auto;
+    gap:10px;
+    align-items:center;
+    padding:8px 0;
+    border-bottom:1px solid rgba(201,162,75,0.12);
+  }
+  .wf-row:last-child{border-bottom:none;}
+  .wf-num{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--gold);text-align:center;}
+  .wf-label{font-size:13px;color:var(--cream);}
+  .wf-note{font-size:10.5px;color:rgba(244,239,228,0.45);display:block;}
+  .wf-pct{font-family:'Space Mono',monospace;font-size:11px;color:rgba(244,239,228,0.4);text-align:right;width:38px;}
+  .wf-val{font-family:'Space Mono',monospace;font-size:13.5px;font-weight:600;color:var(--cream);text-align:right;min-width:74px;}
+  .wf-val.warn{color:var(--terracotta);}
+
+  .alert-row{
+    background:rgba(177,88,60,0.15);
+    border:1px solid var(--terracotta);
+    border-radius:8px;
+    padding:10px 12px;
+    margin:8px 0;
+    font-size:12.5px;
+    color:#e8c9bd;
+  }
+
+  .headline-card{
+    grid-column:1/-1;
+    background:linear-gradient(120deg, rgba(201,162,75,0.14), rgba(74,45,107,0.3));
+    border:1px solid var(--gold);
+    border-radius:14px;
+    padding:28px 32px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:26px;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .headline-item .stat-label{font-size:12.5px;color:rgba(244,239,228,0.65);margin-bottom:4px;}
+  .stat-val.big{font-family:'Space Mono',monospace;font-weight:700;font-size:26px;color:var(--gold-bright);}
+  .stat-val.big.good{color:#8fbf9f;}
+  .stat-val.big.warn{color:var(--terracotta);}
+  .stat-sub{font-family:'Space Mono',monospace;font-size:10.5px;color:rgba(244,239,228,0.4);display:block;margin-top:2px;}
+
+  .result-block{margin-bottom:20px;}
+  .result-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:19px;
+    font-weight:600;
+    color:var(--gold-bright);
+    margin-bottom:2px;
+  }
+  .result-total{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--cream);}
+  .result-sub-list{margin:8px 0 0;padding:0;list-style:none;}
+  .result-sub-list li{
+    display:flex;justify-content:space-between;
+    font-size:12.5px;color:rgba(244,239,228,0.7);
+    padding:4px 0;
+    border-bottom:1px dotted rgba(201,162,75,0.15);
+  }
+  .result-sub-list li:last-child{border-bottom:none;}
+  .result-sub-list .amt{font-family:'Space Mono',monospace;color:var(--gold-bright);}
+
+  .fair-table{width:100%;border-collapse:collapse;margin-top:10px;}
+  .fair-table th, .fair-table td{
+    text-align:right;padding:8px 10px;font-size:12.5px;
+    border-bottom:1px solid rgba(201,162,75,0.15);
+  }
+  .fair-table th:first-child, .fair-table td:first-child{text-align:left;}
+  .fair-table th{
+    font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;
+    letter-spacing:0.06em;color:var(--gold);
+  }
+  .fair-table td{font-family:'Space Mono',monospace;color:var(--cream);}
+  .fair-table td.delta{color:#8fbf9f;}
+
+  .search-result-item{
+    padding:9px 12px;
+    cursor:pointer;
+    font-size:13px;
+    color:var(--cream);
+    border-bottom:1px solid rgba(201,162,75,0.12);
+  }
+  .search-result-item:last-child{border-bottom:none;}
+  .search-result-item:hover{background:rgba(201,162,75,0.15);}
+  .search-result-item .sr-sub{display:block;font-size:11px;color:rgba(244,239,228,0.5);margin-top:2px;}
+  .search-empty{padding:10px 12px;font-size:12px;color:rgba(244,239,228,0.4);font-style:italic;}
+  .entry-row{
+    background:rgba(0,0,0,0.2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:8px;
+  }
+  .entry-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .entry-row-name{font-size:13.5px;font-weight:600;color:var(--cream);}
+  .entry-row-meta{font-size:11px;color:rgba(244,239,228,0.5);margin-top:2px;line-height:1.5;}
+  .entry-row-rate{display:flex;align-items:center;gap:6px;margin-top:8px;}
+  .entry-row-rate .mini-label{margin-bottom:0;}
+
+  .footnote{
+    grid-column:1/-1;
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:rgba(244,239,228,0.35);
+    text-align:center;
+    margin-top:6px;
+    line-height:1.7;
+  }
+  .diamond{color:var(--gold);margin:0 6px;}
+
+  #print-report{display:none;}
+
+  @media print{
+    body *{visibility:hidden;}
+    #print-report, #print-report *{visibility:visible;}
+    #print-report{display:block;position:absolute;left:0;top:0;width:100%;padding:20px;color:#000;background:#fff;}
+    #print-report h1,#print-report h2,#print-report h3{color:#2e1a47;}
+    #print-report table{width:100%;border-collapse:collapse;margin-bottom:14px;}
+    #print-report td,#print-report th{padding:4px 6px;font-size:11px;border-bottom:1px solid #ccc;text-align:left;}
+    #print-report th{text-align:left;background:#f0e8d8;}
+    #print-report .pr-total{font-weight:700;border-top:2px solid #2e1a47;}
+    #print-report .pr-section{margin-bottom:24px;page-break-inside:avoid;}
+    #print-report .pr-h{font-family:Georgia,serif;font-size:16px;color:#4a2d6b;border-bottom:2px solid #c9a24b;padding-bottom:4px;margin-bottom:8px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="eyebrow">Frequency Shift Labs</div>
+  <h1>SENSORIUM</h1>
+  <div class="subtitle">Revenue &amp; Profit Calculator — model the full split before the doors open.</div>
+  <div class="download-bar">
+    <button class="download-btn" onclick="window.print()">↓ Download PDF Report</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="grid">
+
+    <div class="headline-card">
+      <div class="headline-item">
+        <div class="stat-label">Total gross revenue <span class="price-tag">(collected only)</span></div>
+        <div class="stat-val big" id="h-total">$0</div>
+      </div>
+      <div class="headline-item">
+        <div class="stat-label">Total net (Sensorium, both sides)</div>
+        <div class="stat-val big good" id="h-net">$0</div>
+        <span class="stat-sub" id="h-margin">0% margin</span>
+      </div>
+      <div class="headline-item">
+        <div class="stat-label">Per-practitioner payout</div>
+        <div class="stat-val big" id="h-prac">$0</div>
+        <span class="stat-sub" id="h-floor">—</span>
+      </div>
+      <div class="headline-item">
+        <div class="stat-label">Per-nonprofit-partner payout</div>
+        <div class="stat-val big" id="h-np">$0</div>
+        <span class="stat-sub" id="h-np-count">—</span>
+      </div>
+      <div class="scenario-row">
+        <button class="scenario-btn" onclick="loadScenario('conservative', event)">Conservative</button>
+        <button class="scenario-btn active" onclick="loadScenario('realistic', event)">Realistic</button>
+        <button class="scenario-btn" onclick="loadScenario('target', event)">Target</button>
+        <button class="scenario-btn" onclick="loadScenario('full', event)">Full House</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Ticket Revenue</h2>
+      <div class="desc">Add, rename, or remove tiers freely. RSVP stays locked at $0 — everything else is fully editable.</div>
+
+      <div class="field-group">
+        <div class="field-group-title">
+          <span>Ticket Tiers</span>
+          <button class="add-btn" onclick="addTierRow()">+ Add tier</button>
+        </div>
+        <div id="tier-rows"></div>
+        <div class="section-total" id="tier-total"><span class="lbl">Total ticket tiers (gross)</span><span class="amt">$0</span></div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">
+          <span>Promo Codes</span>
+          <button class="add-btn" onclick="addPromoRow()">+ Add promo</button>
+        </div>
+        <div id="promo-rows"></div>
+        <div class="section-total" id="promo-total"><span class="lbl">Total promo discounts (not collected)</span><span class="amt">$0</span></div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Ticketing Cost</div>
+        <div class="field">
+          <label>Processing fee (nonprofit-rate)</label>
+          <input type="number" id="t-fee-pct" value="0" min="0" max="100" step="0.5" oninput="calc()">
+          <span class="price-tag">%</span>
+        </div>
+        <div class="section-total emphasize" id="ticket-rev-total"><span class="lbl">Total ticket revenue (collected, net of promo + fees)</span><span class="amt">$0</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Ticket Revenue Splits</h2>
+      <div class="desc">Gross ticket revenue minus promo discounts, fees, and ticket-side ops is the base. Nonprofit, venue/partner splits, and Pay It Forward are each a flat % of that same base — whatever's left goes to practitioners.</div>
+
+      <div class="field-group">
+        <div class="field-group-title">Standing Cuts <span class="price-tag">% of base, after ops</span></div>
+        <div class="field">
+          <label>Sensorium Pay It Forward</label>
+          <input type="number" id="s-pif-pct" value="12" min="0" max="100" oninput="calc()">
+          <span class="price-tag">%</span>
+        </div>
+        <div class="field">
+          <label>Nonprofit Partners</label>
+          <input type="number" id="s-np-pct" value="6" min="0" max="100" oninput="calc()">
+          <span class="price-tag">%</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">
+          <span>Nonprofit Partners</span>
+          <button class="add-btn" onclick="addNpPartnerRow()">+ Add partner</button>
+        </div>
+        <div class="desc" style="margin-bottom:8px;">Name each partner — the combined nonprofit payout splits evenly across everyone listed here.</div>
+        <div id="np-partner-rows"></div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">
+          <span>Venue &amp; Partner Splits</span>
+          <button class="add-btn" onclick="addSplitRow()">+ Add split</button>
+        </div>
+        <div id="split-rows"></div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">
+          <span>Teaching Practitioners</span>
+          <span class="mini-label" id="prac-search-status" style="text-transform:none;letter-spacing:0;"></span>
+        </div>
+        <div class="desc" style="margin-bottom:8px;">Search submitted practitioner profiles — only add people who are actually getting paid from this pool.</div>
+        <div style="position:relative;margin-bottom:10px;">
+          <input type="text" id="prac-search-input" placeholder="Search practitioner profiles…" style="width:100%;text-align:left;font-family:'Inter',sans-serif;" oninput="renderPracSearchResults()" onfocus="renderPracSearchResults()">
+          <div id="prac-search-results" style="display:none;position:absolute;left:0;right:0;top:100%;background:#241a30;border:1px solid var(--gold);border-radius:8px;max-height:220px;overflow-y:auto;z-index:10;margin-top:4px;"></div>
+        </div>
+        <div id="prac-entry-rows"></div>
+        <div class="section-total" id="prac-count-total"><span class="lbl">Teaching activators</span><span class="amt">0</span></div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Practitioner Ticket Kickback</div>
+        <div class="desc" style="margin-bottom:8px;">Fair-sale kickback from tracking-link ticket sales — subtracted from the practitioner pool before it's split evenly.</div>
+        <div class="field">
+          <label>Kickback per ticket sold</label>
+          <span class="dollar-prefix">$</span>
+          <input type="number" id="s-kickback-price" value="5" min="0" oninput="calc()">
+        </div>
+        <div class="field">
+          <label>Tickets sold via tracking links</label>
+          <input type="number" id="s-kickback-count" value="18" min="0" oninput="calc()">
+        </div>
+        <div class="section-total" id="kickback-total"><span class="lbl">Total kickback</span><span class="amt">$0</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Vendor &amp; Sponsor Revenue</h2>
+      <div class="desc">Tier rates editable — raise them each event as the series scales.</div>
+
+      <div class="field-group">
+        <div class="field-group-title">Default Tier Rates <span class="price-tag">used to pre-fill new vendors added below</span></div>
+        <div class="dyn-row">
+          <input type="text" value="Tier 1 · Community Presence" style="flex:1" disabled>
+          <div class="col"><span class="mini-label">Rate</span><input type="number" id="v-t1-rate" value="45" min="0"></div>
+        </div>
+        <div class="dyn-row">
+          <input type="text" value="Tier 2 · Sensorium Visibility" style="flex:1" disabled>
+          <div class="col"><span class="mini-label">Rate</span><input type="number" id="v-t2-rate" value="75" min="0"></div>
+        </div>
+        <div class="dyn-row">
+          <input type="text" value="Tier 3 · Featured Partner" style="flex:1" disabled>
+          <div class="col"><span class="mini-label">Rate</span><input type="number" id="v-t3-rate" value="125" min="0"></div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">
+          <span>Selected Vendors</span>
+          <span class="mini-label" id="vendor-search-status" style="text-transform:none;letter-spacing:0;"></span>
+        </div>
+        <div class="desc" style="margin-bottom:8px;">Search submitted vendor profiles by name — the rate pre-fills from the tier above but stays fully editable per vendor.</div>
+        <div style="position:relative;margin-bottom:10px;">
+          <input type="text" id="vendor-search-input" placeholder="Search vendor profiles…" style="width:100%;text-align:left;font-family:'Inter',sans-serif;" oninput="renderVendorSearchResults()" onfocus="renderVendorSearchResults()">
+          <div id="vendor-search-results" style="display:none;position:absolute;left:0;right:0;top:100%;background:#241a30;border:1px solid var(--gold);border-radius:8px;max-height:220px;overflow-y:auto;z-index:10;margin-top:4px;"></div>
+        </div>
+        <div id="vendor-entry-rows"></div>
+        <div class="section-total" id="vendor-tier-total"><span class="lbl">Total vendor tiers</span><span class="amt">$0</span></div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Revenue-Share Vendors</div>
+        <div class="field">
+          <label>Bio/Elixir rev-share count</label>
+          <input type="number" id="v-revshare-count" value="0" min="0" oninput="calc()">
+        </div>
+        <div class="field">
+          <label>Avg. sales per rev-share vendor</label>
+          <span class="dollar-prefix">$</span>
+          <input type="number" id="v-revshare-sales" value="0" min="0" oninput="calc()">
+        </div>
+        <div class="field">
+          <label>Rev-share %</label>
+          <input type="number" id="v-revshare-pct" value="0" min="0" max="100" oninput="calc()">
+          <span class="price-tag">%</span>
+        </div>
+        <div class="section-total" id="revshare-total"><span class="lbl">Total rev-share vendors</span><span class="amt">$0</span></div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Sponsors</div>
+        <div class="field">
+          <label>Total sponsor revenue <span class="price-tag">all sponsors combined</span></label>
+          <span class="dollar-prefix">$</span>
+          <input type="number" id="v-sponsor-total" value="0" min="0" oninput="calc()">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Vendor-Side Splits <span class="price-tag">only if profit remains after ops</span></div>
+        <div class="field">
+          <label>Nonprofit Partners</label>
+          <input type="number" id="s-np-vendor-pct" value="6" min="0" max="100" oninput="calc()">
+          <span class="price-tag">%</span>
+        </div>
+        <div class="field">
+          <label>Equitable Partner Fund</label>
+          <input type="number" id="s-epf-pct" value="12" min="0" max="100" oninput="calc()">
+          <span class="price-tag">%</span>
+        </div>
+        <div class="section-total emphasize" id="vendor-grand-total"><span class="lbl">Grand total vendor &amp; sponsorship revenue</span><span class="amt">$0</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Operating Costs</h2>
+      <div class="desc">Add as many line items as you need. Check whether each one draws from ticket revenue, vendor revenue, or both (split evenly if both).</div>
+
+      <div class="cost-header">
+        <div>Item</div><div>Amount</div><div>Ticket</div><div>Vendor</div><div></div>
+      </div>
+      <div id="cost-rows"></div>
+      <button class="add-btn" onclick="addCostRow()">+ Add cost</button>
+      <div class="section-total" id="ops-total-ticket"><span class="lbl">Total ticket-side ops</span><span class="amt">$0</span></div>
+      <div class="section-total" id="ops-total-vendor"><span class="lbl">Total vendor-side ops</span><span class="amt">$0</span></div>
+      <div class="section-total emphasize" id="ops-total-grand"><span class="lbl">Total operating costs</span><span class="amt">$0</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>The Waterfall</h2>
+      <div class="desc">Where every dollar goes, in order.</div>
+
+      <div class="divider-label">Ticket-Side Cascade</div>
+      <div class="waterfall" id="wf-ticket"></div>
+
+      <div class="divider-label">Vendor-Side Cascade</div>
+      <div id="vendor-alert"></div>
+      <div class="waterfall" id="wf-vendor"></div>
+    </div>
+
+    <div class="panel full" id="fairness-panel" style="display:none;">
+      <h2>Venue Fairness Scenario</h2>
+      <div class="desc">Sensorium's Pay It Forward already absorbed part of the vendor-side shortfall. If the venue reimburses the rest instead of it coming out of the practitioner pool, here's the difference.</div>
+      <label style="display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:12.5px;color:var(--gold-bright);cursor:pointer;margin-bottom:12px;">
+        <input type="checkbox" id="fairness-toggle" onchange="calc()" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
+        Apply this scenario — venue reimburses the shortfall (updates the waterfall, results, and PDF)
+      </label>
+      <div id="fairness-content"></div>
+    </div>
+
+    <div class="panel full">
+      <h2>Results Summary</h2>
+      <div class="desc">Every payout, with individual splits shown where a pool is divided among more than one recipient.</div>
+      <div id="results-summary"></div>
+    </div>
+
+    <div class="footnote">
+      <span class="diamond">✦</span> Ticket revenue: gross − promo − processing fee − ticket-side ops = base. Nonprofit, venue/partner splits, and Sensorium Pay It Forward are each a flat % of that base; whatever remains, minus the practitioner ticket kickback, is the practitioner pool <span class="diamond">✦</span> Vendor revenue: gross − vendor-side ops. If that's negative, the shortfall is drawn first from the ticket-side Pay It Forward, then from the practitioner pool (flagged for venue reimbursement) — nonprofit and the Equitable Partner Fund only get paid if profit remains <span class="diamond">✦</span> Gross revenue excludes promo-discounted amounts, since that money was never collected <span class="diamond">✦</span> Figures are projections, not guarantees <span class="diamond">✦</span>
+    </div>
+
+  </div>
+</div>
+
+<div id="print-report"></div>
+
+<script>
+let tierRows = [
+  { name:'GA',                  price:33, count:22, locked:false },
+  { name:'On-site',             price:40, count:5,  locked:false },
+  { name:'SFB Pre-sale',        price:54, count:7,  locked:false },
+  { name:'Soul Family Bundle',  price:60, count:2,  locked:false },
+  { name:'RSVP',                price:0,  count:48, locked:true  }
+];
+
+let promoRows = [
+  { name:'Partner Referral',    amount:2,  count:4 },
+  { name:'FREQUENCY369',        amount:5,  count:4 },
+  { name:"Venue Member's Rate", amount:3,  count:3 }
+];
+
+let npPartnerRows = [
+  { name:'Sister City of Delray Beach' },
+  { name:'Nonprofit Partner 2' }
+];
+
+let splitRows = [
+  { name:'Venue Fee', pct:40 }
+];
+
+let costRows = [
+  { name:'Ads',                    amount:30,  ticket:true, vendor:true },
+  { name:'Print Marketing',        amount:50,  ticket:true, vendor:true },
+  { name:'Signage',                amount:376, ticket:true, vendor:true },
+  { name:'Marketing Subscriptions',amount:99,  ticket:true, vendor:true }
+];
+
+/* ============================================================
+   SENSORIUM DIRECTORY — live search against submitted profiles
+   ============================================================
+   Set APPS_SCRIPT_URL to your deployed Web App /exec URL.
+   Calls ?action=directory which returns:
+   { vendors: [{name, tier, vendorType, boothSize}, ...],
+     practitioners: [{name, practitionerType, primaryModality}, ...] }
+   ============================================================ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsaKmv5c6T88iKIN0rfg7QxEVQcWsbuHDxeymKZkabQ2XWch0rEIedfKi73iZop-M6/exec';
+
+let directoryVendors = [];
+let directoryPractitioners = [];
+let vendorEntries = [];   // { name, tier, vendorType, boothSize, rate }
+let pracEntries = [];     // { name, practitionerType, primaryModality }
+
+const TIER_DEFAULT_RATE = {
+  'Tier 1': () => parseFloat(document.getElementById('v-t1-rate').value) || 0,
+  'Tier 2': () => parseFloat(document.getElementById('v-t2-rate').value) || 0,
+  'Tier 3': () => parseFloat(document.getElementById('v-t3-rate').value) || 0,
+};
+
+async function fetchDirectory(){
+  const vStatus = document.getElementById('vendor-search-status');
+  const pStatus = document.getElementById('prac-search-status');
+  vStatus.textContent = 'loading…'; pStatus.textContent = 'loading…';
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=directory');
+    const data = await res.json();
+    directoryVendors = data.vendors || [];
+    directoryPractitioners = data.practitioners || [];
+    vStatus.textContent = `${directoryVendors.length} profiles`;
+    pStatus.textContent = `${directoryPractitioners.length} profiles`;
+  } catch(err){
+    vStatus.textContent = '⚠ directory unavailable';
+    pStatus.textContent = '⚠ directory unavailable';
+    console.error('Directory fetch failed:', err);
+  }
+}
+
+/* ---------- Vendor search + entries ---------- */
+function renderVendorSearchResults(){
+  const q = document.getElementById('vendor-search-input').value.trim().toLowerCase();
+  const box = document.getElementById('vendor-search-results');
+  if(!q){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  const already = new Set(vendorEntries.map(v=>v.name));
+  const matches = directoryVendors.filter(v =>
+    v.name.toLowerCase().includes(q) && !already.has(v.name)
+  ).slice(0, 12);
+  if(matches.length === 0){
+    box.innerHTML = '<div class="search-empty">No matching vendor profiles</div>';
+  } else {
+    box.innerHTML = matches.map((v,i) => `
+      <div class="search-result-item" onclick='addVendorEntry(${JSON.stringify(v).replace(/'/g,"&#39;")})'>
+        ${v.name}
+        <span class="sr-sub">${v.tier || 'No tier'} · ${v.vendorType || 'type n/a'} · ${v.boothSize || 'booth n/a'}</span>
+      </div>
+    `).join('');
+  }
+  box.style.display = 'block';
+}
+function addVendorEntry(profile){
+  const rateFn = TIER_DEFAULT_RATE[profile.tier];
+  const rate = rateFn ? rateFn() : 0;
+  vendorEntries.push({
+    name: profile.name, tier: profile.tier || '', vendorType: profile.vendorType || '',
+    boothSize: profile.boothSize || '', rate: rate
+  });
+  document.getElementById('vendor-search-input').value = '';
+  document.getElementById('vendor-search-results').style.display = 'none';
+  renderVendorEntryRows(); calc();
+}
+function removeVendorEntry(i){ vendorEntries.splice(i,1); renderVendorEntryRows(); calc(); }
+function updateVendorEntryRate(i, val){ vendorEntries[i].rate = parseFloat(val) || 0; calc(); }
+function renderVendorEntryRows(){
+  const el = document.getElementById('vendor-entry-rows');
+  if(vendorEntries.length === 0){
+    el.innerHTML = '<div class="search-empty">No vendors added yet — search above to add from submitted profiles.</div>';
+    return;
+  }
+  el.innerHTML = vendorEntries.map((v,i) => `
+    <div class="entry-row">
+      <div class="entry-row-top">
+        <div>
+          <div class="entry-row-name">${v.name}</div>
+          <div class="entry-row-meta">${v.tier || 'No tier'} · ${v.vendorType || 'type n/a'} · ${v.boothSize || 'booth n/a'}</div>
+        </div>
+        <button class="icon-btn" onclick="removeVendorEntry(${i})" title="Remove">×</button>
+      </div>
+      <div class="entry-row-rate">
+        <span class="mini-label">Rate</span>
+        <span class="dollar-prefix">$</span>
+        <input type="number" value="${v.rate}" min="0" oninput="updateVendorEntryRate(${i}, this.value)">
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ---------- Practitioner search + entries ---------- */
+function renderPracSearchResults(){
+  const q = document.getElementById('prac-search-input').value.trim().toLowerCase();
+  const box = document.getElementById('prac-search-results');
+  if(!q){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  const already = new Set(pracEntries.map(p=>p.name));
+  const matches = directoryPractitioners.filter(p =>
+    p.name.toLowerCase().includes(q) && !already.has(p.name)
+  ).slice(0, 12);
+  if(matches.length === 0){
+    box.innerHTML = '<div class="search-empty">No matching practitioner profiles</div>';
+  } else {
+    box.innerHTML = matches.map((p,i) => `
+      <div class="search-result-item" onclick='addPracEntry(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+        ${p.name}
+        <span class="sr-sub">${p.practitionerType || 'type n/a'} · ${p.primaryModality || 'modality n/a'}</span>
+      </div>
+    `).join('');
+  }
+  box.style.display = 'block';
+}
+function addPracEntry(profile){
+  pracEntries.push({
+    name: profile.name, practitionerType: profile.practitionerType || '',
+    primaryModality: profile.primaryModality || ''
+  });
+  document.getElementById('prac-search-input').value = '';
+  document.getElementById('prac-search-results').style.display = 'none';
+  renderPracEntryRows(); calc();
+}
+function removePracEntry(i){ pracEntries.splice(i,1); renderPracEntryRows(); calc(); }
+function renderPracEntryRows(){
+  const el = document.getElementById('prac-entry-rows');
+  if(pracEntries.length === 0){
+    el.innerHTML = '<div class="search-empty">No practitioners added yet — search above to add from submitted profiles.</div>';
+    return;
+  }
+  el.innerHTML = pracEntries.map((p,i) => `
+    <div class="entry-row">
+      <div class="entry-row-top">
+        <div>
+          <div class="entry-row-name">${p.name}</div>
+          <div class="entry-row-meta">${p.practitionerType || 'type n/a'} · ${p.primaryModality || 'modality n/a'}</div>
+        </div>
+        <button class="icon-btn" onclick="removePracEntry(${i})" title="Remove">×</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Close search dropdowns when clicking elsewhere on the page
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('#vendor-search-input') && !e.target.closest('#vendor-search-results')){
+    const box = document.getElementById('vendor-search-results');
+    if(box) box.style.display = 'none';
+  }
+  if(!e.target.closest('#prac-search-input') && !e.target.closest('#prac-search-results')){
+    const box = document.getElementById('prac-search-results');
+    if(box) box.style.display = 'none';
+  }
+});
+
+const scenarios = {
+  conservative: { mult:0.6,  v1:6,  v2:2,  v3:1,  rsCount:0, sponsorTotal:0   },
+  realistic:    { mult:1.0,  v1:8,  v2:4,  v3:3,  rsCount:1, sponsorTotal:250 },
+  target:       { mult:1.3,  v1:9,  v2:5,  v3:3,  rsCount:2, sponsorTotal:400 },
+  full:         { mult:2.0,  v1:15, v2:15, v3:10, rsCount:3, sponsorTotal:750 }
+};
+
+const baseTierCounts = [22,5,7,2,48];
+const basePromoCounts = [4,4,3];
+
+function loadScenario(name, evt){
+  const s = scenarios[name];
+  tierRows.forEach((row,i) => { row.count = Math.round((baseTierCounts[i]||row.count) * s.mult); });
+  promoRows.forEach((row,i) => { row.count = Math.round((basePromoCounts[i]||row.count) * s.mult); });
+  document.getElementById('v-revshare-count').value = s.rsCount;
+  document.getElementById('v-sponsor-total').value = s.sponsorTotal;
+  // Note: vendor/practitioner counts now come from real selected profiles below,
+  // not scenario presets — scenarios only pre-fill ticket volume + rev-share/sponsor totals.
+
+  renderTierRows();
+  renderPromoRows();
+  document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active'));
+  if(evt) evt.target.classList.add('active');
+  calc();
+}
+
+function fmt(n){
+  const neg = n < 0;
+  const v = Math.abs(Math.round(n));
+  return (neg?'-$':'$') + v.toLocaleString('en-US');
+}
+
+function wfRow(num, label, note, val, pct){
+  const valClass = val < 0 ? 'wf-val warn' : 'wf-val';
+  return `<div class="wf-row">
+    <div class="wf-num">${num}</div>
+    <div><div class="wf-label">${label}</div>${note?`<span class="wf-note">${note}</span>`:''}</div>
+    <div class="wf-pct">${pct!==undefined?pct+'%':''}</div>
+    <div class="${valClass}">${fmt(val)}</div>
+  </div>`;
+}
+
+/* ---------- Ticket tier rows ---------- */
+function renderTierRows(){
+  const el = document.getElementById('tier-rows');
+  el.innerHTML = tierRows.map((row,i) => `
+    <div class="dyn-row">
+      <input type="text" value="${row.name}" oninput="updateTierRow(${i},'name',this.value)">
+      <div class="col"><span class="mini-label">Price</span>
+        <input type="number" value="${row.price}" min="0" ${row.locked?'disabled':''} oninput="updateTierRow(${i},'price',this.value)">
+      </div>
+      <div class="col"><span class="mini-label">Count</span>
+        <input type="number" value="${row.count}" min="0" oninput="updateTierRow(${i},'count',this.value)">
+      </div>
+      <button class="icon-btn" onclick="removeTierRow(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+function addTierRow(){ tierRows.push({ name:'New Tier', price:0, count:0, locked:false }); renderTierRows(); calc(); }
+function removeTierRow(i){ tierRows.splice(i,1); renderTierRows(); calc(); }
+function updateTierRow(i, field, val){
+  if(field==='price' || field==='count') tierRows[i][field] = parseFloat(val)||0;
+  else tierRows[i][field] = val;
+  calc();
+}
+
+/* ---------- Promo code rows ---------- */
+function renderPromoRows(){
+  const el = document.getElementById('promo-rows');
+  el.innerHTML = promoRows.map((row,i) => `
+    <div class="dyn-row">
+      <input type="text" value="${row.name}" oninput="updatePromoRow(${i},'name',this.value)">
+      <div class="col"><span class="mini-label">$ off</span>
+        <input type="number" value="${row.amount}" min="0" oninput="updatePromoRow(${i},'amount',this.value)">
+      </div>
+      <div class="col"><span class="mini-label">Count</span>
+        <input type="number" value="${row.count}" min="0" oninput="updatePromoRow(${i},'count',this.value)">
+      </div>
+      <button class="icon-btn" onclick="removePromoRow(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+function addPromoRow(){ promoRows.push({ name:'New Promo', amount:0, count:0 }); renderPromoRows(); calc(); }
+function removePromoRow(i){ promoRows.splice(i,1); renderPromoRows(); calc(); }
+function updatePromoRow(i, field, val){
+  if(field==='amount' || field==='count') promoRows[i][field] = parseFloat(val)||0;
+  else promoRows[i][field] = val;
+  calc();
+}
+
+/* ---------- Nonprofit partner name rows ---------- */
+function renderNpPartnerRows(){
+  const el = document.getElementById('np-partner-rows');
+  el.innerHTML = npPartnerRows.map((row,i) => `
+    <div class="name-row">
+      <input type="text" value="${row.name}" oninput="updateNpPartnerRow(${i},this.value)">
+      <button class="icon-btn" onclick="removeNpPartnerRow(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+function addNpPartnerRow(){ npPartnerRows.push({ name:'New Nonprofit Partner' }); renderNpPartnerRows(); calc(); }
+function removeNpPartnerRow(i){ npPartnerRows.splice(i,1); renderNpPartnerRows(); calc(); }
+function updateNpPartnerRow(i, val){ npPartnerRows[i].name = val; calc(); }
+
+/* ---------- Additional split rows ---------- */
+function renderSplitRows(){
+  const el = document.getElementById('split-rows');
+  el.innerHTML = splitRows.map((row, i) => `
+    <div class="split-row">
+      <input type="text" value="${row.name}" oninput="updateSplitRow(${i},'name',this.value)">
+      <div class="pct-wrap">
+        <input type="number" value="${row.pct}" min="0" max="100" style="width:56px" oninput="updateSplitRow(${i},'pct',this.value)">
+        <span class="price-tag">%</span>
+      </div>
+      <button class="icon-btn" onclick="removeSplitRow(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+function addSplitRow(){ splitRows.push({ name:'New split', pct:0 }); renderSplitRows(); calc(); }
+function removeSplitRow(i){ splitRows.splice(i,1); renderSplitRows(); calc(); }
+function updateSplitRow(i, field, val){
+  splitRows[i][field] = field==='pct' ? (parseFloat(val)||0) : val;
+  calc();
+}
+
+/* ---------- Operating cost rows ---------- */
+function renderCostRows(){
+  const el = document.getElementById('cost-rows');
+  el.innerHTML = costRows.map((row, i) => `
+    <div class="cost-row">
+      <input type="text" value="${row.name}" oninput="updateCostRow(${i},'name',this.value)">
+      <input type="number" value="${row.amount}" min="0" oninput="updateCostRow(${i},'amount',this.value)">
+      <div class="chk-wrap"><input type="checkbox" ${row.ticket?'checked':''} onchange="updateCostRow(${i},'ticket',this.checked)"></div>
+      <div class="chk-wrap"><input type="checkbox" ${row.vendor?'checked':''} onchange="updateCostRow(${i},'vendor',this.checked)"></div>
+      <button class="icon-btn" onclick="removeCostRow(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+function addCostRow(){ costRows.push({ name:'New cost', amount:0, ticket:true, vendor:false }); renderCostRows(); calc(); }
+function removeCostRow(i){ costRows.splice(i,1); renderCostRows(); calc(); }
+function updateCostRow(i, field, val){
+  if(field==='amount') costRows[i][field] = parseFloat(val)||0;
+  else costRows[i][field] = val;
+  calc();
+}
+
+function setTotal(id, label, val, positive){
+  const el = document.getElementById(id);
+  el.innerHTML = `<span class="lbl">${label}</span><span class="amt">${positive===false?'-':''}${fmt(Math.abs(val))}</span>`;
+}
+
+/* ---------- Main calculation ---------- */
+function calc(){
+  const gv = id => parseFloat(document.getElementById(id).value) || 0;
+  const fairnessToggleEl = document.getElementById('fairness-toggle');
+  const applyFairness = fairnessToggleEl ? fairnessToggleEl.checked : false;
+
+  /* ---------------- TICKET SIDE ---------------- */
+  const totalTickets = tierRows.reduce((s,r)=>s+(r.count||0),0);
+  const grossTicket = tierRows.reduce((s,r)=>s+(r.price||0)*(r.count||0),0);
+
+  const promoDiscount = promoRows.reduce((s,r)=>s+(r.amount||0)*(r.count||0),0);
+  const promoNote = promoRows.map(r => `${r.count} ${r.name}`).join(', ');
+
+  const netTicketBeforeFees = grossTicket - promoDiscount; // collected ticket revenue, before processing fee
+  const feePct = gv('t-fee-pct')/100;
+  const ticketFees = netTicketBeforeFees * feePct;
+  const netTicketAfterFees = Math.max(netTicketBeforeFees - ticketFees, 0);
+
+  let ticketOpsTotal = 0, vendorOpsTotal = 0;
+  costRows.forEach(row => {
+    if(row.ticket && row.vendor){ ticketOpsTotal += row.amount/2; vendorOpsTotal += row.amount/2; }
+    else if(row.ticket){ ticketOpsTotal += row.amount; }
+    else if(row.vendor){ vendorOpsTotal += row.amount; }
+  });
+  const grandOpsTotal = costRows.reduce((s,r)=>s+(r.amount||0),0);
+
+  const baseForSplits = Math.max(netTicketAfterFees - ticketOpsTotal, 0);
+
+  const npTicketPct = gv('s-np-pct');
+  const nonprofitFromTicket = baseForSplits * (npTicketPct/100);
+
+  const splitAmts = splitRows.map(s => ({ name:s.name, pct:s.pct, amt: baseForSplits * (s.pct/100) }));
+  const venueSplitsTotal = splitAmts.reduce((s,r)=>s+r.amt,0);
+
+  const pifPct = gv('s-pif-pct');
+  const pifAmtOriginal = baseForSplits * (pifPct/100);
+  let pifAmt = pifAmtOriginal;
+
+  const practitionerPoolBeforeKickback = baseForSplits - nonprofitFromTicket - venueSplitsTotal - pifAmtOriginal;
+
+  const kickbackPrice = gv('s-kickback-price');
+  const kickbackCount = gv('s-kickback-count');
+  const kickbackTotal = kickbackPrice * kickbackCount;
+
+  const practitionerPoolPreShortfall = practitionerPoolBeforeKickback - kickbackTotal;
+  let practitionerPool = practitionerPoolPreShortfall;
+  const pracCount = Math.max(pracEntries.length,1);
+
+  /* ---------------- VENDOR SIDE ---------------- */
+  const vendorFlat = vendorEntries.reduce((s,v)=>s+(parseFloat(v.rate)||0),0);
+  const rsCount = gv('v-revshare-count'), rsSales = gv('v-revshare-sales'), rsPct = gv('v-revshare-pct')/100;
+  const revShareTotal = rsCount*rsSales*rsPct;
+  const vendorGross = vendorFlat + revShareTotal;
+  const totalVendorCount = vendorEntries.length + rsCount;
+
+  const sponsorTotal = gv('v-sponsor-total');
+  const vendorSideGross = vendorGross + sponsorTotal;
+
+  const vendorRemainingAfterOps = vendorSideGross - vendorOpsTotal;
+
+  let nonprofitFromVendor = 0, epfAmt = 0, sensoriumNetVendor = 0;
+  let shortfallAmount = 0, drawFromPIF = 0, drawFromPracPool = 0;
+
+  const npVendorPct = gv('s-np-vendor-pct');
+  const epfPct = gv('s-epf-pct');
+
+  if(vendorRemainingAfterOps >= 0){
+    nonprofitFromVendor = vendorRemainingAfterOps * (npVendorPct/100);
+    const afterNP = vendorRemainingAfterOps - nonprofitFromVendor;
+    epfAmt = afterNP * (epfPct/100);
+    sensoriumNetVendor = afterNP - epfAmt;
+  } else {
+    shortfallAmount = -vendorRemainingAfterOps;
+    drawFromPIF = Math.min(shortfallAmount, pifAmtOriginal);
+    pifAmt = pifAmtOriginal - drawFromPIF;
+    const remainingShortfall = shortfallAmount - drawFromPIF;
+    if(remainingShortfall > 0){
+      drawFromPracPool = remainingShortfall;
+      practitionerPool = applyFairness ? practitionerPoolPreShortfall : (practitionerPoolPreShortfall - drawFromPracPool);
+    }
+    nonprofitFromVendor = 0;
+    epfAmt = 0;
+    sensoriumNetVendor = 0;
+  }
+
+  const perPrac = practitionerPool / pracCount;
+  const perPracFair = practitionerPoolPreShortfall / pracCount; // if venue absorbed its own shortfall
+  const totalNonprofit = nonprofitFromTicket + nonprofitFromVendor;
+  const npPartnerCount = Math.max(npPartnerRows.length,1);
+  const perNpPartner = totalNonprofit / npPartnerCount;
+
+  const totalNetSensorium = pifAmt + sensoriumNetVendor;
+  const totalGrossCollected = netTicketBeforeFees + vendorSideGross; // excludes discounted/uncollected promo money
+  const totalRevenue = netTicketAfterFees + vendorSideGross;
+  const marginPct = totalRevenue>0 ? (totalNetSensorium/totalRevenue*100) : 0;
+
+  /* ---------------- HEADLINE ---------------- */
+  document.getElementById('h-total').textContent = fmt(totalGrossCollected);
+  const netEl = document.getElementById('h-net');
+  netEl.textContent = fmt(totalNetSensorium);
+  netEl.className = 'stat-val big ' + (totalNetSensorium>=0?'good':'warn');
+  document.getElementById('h-margin').textContent = marginPct.toFixed(1)+'% margin';
+  document.getElementById('h-prac').textContent = fmt(perPrac);
+  document.getElementById('h-floor').textContent = perPrac>=150 ? '✓ above $150 floor' : (practitionerPool<0 ? '⚠ pool went negative' : '⚠ below $150 floor');
+  document.getElementById('h-np').textContent = fmt(perNpPartner);
+  document.getElementById('h-np-count').textContent = `across ${npPartnerCount} partner${npPartnerCount>1?'s':''}`;
+
+  /* ---------------- SECTION TOTALS ---------------- */
+  setTotal('tier-total', `Total ticket tiers (gross) · ${totalTickets} tickets`, grossTicket);
+  setTotal('promo-total', 'Total promo discounts (not collected)', promoDiscount, false);
+  setTotal('ticket-rev-total', 'Total ticket revenue (collected, net of promo + fees)', netTicketAfterFees);
+  setTotal('kickback-total', 'Total kickback', kickbackTotal, false);
+  setTotal('vendor-tier-total', `Total vendor tiers · ${vendorEntries.length} vendor${vendorEntries.length===1?'':'s'}`, vendorFlat);
+  document.getElementById('prac-count-total').innerHTML = `<span class="lbl">Teaching activators</span><span class="amt">${pracEntries.length}</span>`;
+  setTotal('revshare-total', 'Total rev-share vendors', revShareTotal);
+  setTotal('vendor-grand-total', 'Grand total vendor & sponsorship revenue', vendorSideGross);
+  setTotal('ops-total-ticket', 'Total ticket-side ops', ticketOpsTotal, false);
+  setTotal('ops-total-vendor', 'Total vendor-side ops', vendorOpsTotal, false);
+  setTotal('ops-total-grand', 'Total operating costs', grandOpsTotal, false);
+
+  /* ---------------- TICKET WATERFALL ---------------- */
+  let t = '';
+  t += wfRow('①','Gross ticket revenue', `${totalTickets} tickets across ${tierRows.length} tiers`, grossTicket);
+  t += wfRow('②','Promo discounts', `${promoNote} — never collected`, -promoDiscount);
+  t += wfRow('③','Processing fees', `${(feePct*100).toFixed(1)}% of net`, -ticketFees);
+  t += wfRow('④','Ticket-side operating costs', '', -ticketOpsTotal);
+  t += wfRow('⑤','Nonprofit Partners', '', -nonprofitFromTicket, npTicketPct);
+  splitAmts.forEach(s => { t += wfRow('⑥', s.name || 'Venue split', '', -s.amt, s.pct); });
+  t += wfRow('⑦','Sensorium Pay It Forward',
+    shortfallAmount>0 ? `would have been ${fmt(pifAmtOriginal)} — reduced ${fmt(drawFromPIF)} to cover vendor shortfall` : '',
+    -pifAmt, pifPct);
+  t += wfRow('⑧','Practitioner ticket kickback', `${kickbackCount} tickets × ${fmt(kickbackPrice)}`, -kickbackTotal);
+  t += wfRow('⑨','Practitioner pool',
+    `${pracCount} activators · ${fmt(perPrac)} each` + (drawFromPracPool>0 ? (applyFairness ? ` — venue is reimbursing ${fmt(drawFromPracPool)} of shortfall, pool held at full ${fmt(practitionerPoolPreShortfall)}` : ` — would have been ${fmt(practitionerPoolPreShortfall)}, reduced ${fmt(drawFromPracPool)} for vendor shortfall`) : ''),
+    practitionerPool);
+  document.getElementById('wf-ticket').innerHTML = t;
+
+  /* ---------------- VENDOR WATERFALL ---------------- */
+  const alertEl = document.getElementById('vendor-alert');
+  if(shortfallAmount > 0){
+    const practitionerClause = drawFromPracPool>0
+      ? (applyFairness
+          ? ` and ${fmt(drawFromPracPool)} is being reimbursed by the venue (fairness scenario applied) rather than coming out of the practitioner pool`
+          : ` and ${fmt(drawFromPracPool)} from the practitioner pool — bill the venue for this amount`)
+      : '';
+    alertEl.innerHTML = `<div class="alert-row">⚠ Vendor-side costs exceed vendor revenue by ${fmt(shortfallAmount)}. Covered by ${fmt(drawFromPIF)} from the ticket-side Pay It Forward${practitionerClause}. Nonprofit and Equitable Partner Fund get $0 on the vendor side this event.</div>`;
+  } else {
+    alertEl.innerHTML = '';
+  }
+
+  let v = '';
+  v += wfRow('①','Vendor tier + rev-share revenue', `${totalVendorCount} vendors`, vendorGross);
+  v += wfRow('②','Sponsor revenue', 'total, all sponsors', sponsorTotal);
+  v += wfRow('③','Vendor-side operating costs', '', -vendorOpsTotal);
+  if(shortfallAmount > 0){
+    v += wfRow('④','Shortfall drawn from ticket Pay It Forward', '', drawFromPIF);
+    if(drawFromPracPool>0) v += wfRow('⑤', applyFairness ? 'Shortfall reimbursed by venue' : 'Shortfall drawn from practitioner pool', applyFairness ? 'fairness scenario applied' : 'bill the venue for this', drawFromPracPool);
+  }
+  v += wfRow('⑥','Nonprofit Partners', shortfallAmount>0?'no profit remained':'', -nonprofitFromVendor, npVendorPct);
+  v += wfRow('⑦','Equitable Partner Fund', shortfallAmount>0?'no profit remained':'', -epfAmt, epfPct);
+  v += wfRow('⑧','Sensorium Pay It Forward (vendor-side)', '', sensoriumNetVendor);
+  document.getElementById('wf-vendor').innerHTML = v;
+
+  /* ---------------- VENUE FAIRNESS SCENARIO ---------------- */
+  const fairnessPanel = document.getElementById('fairness-panel');
+  if(drawFromPracPool > 0){
+    fairnessPanel.style.display = 'block';
+    const perPracDelta = perPracFair - (practitionerPoolPreShortfall - drawFromPracPool)/pracCount;
+    const currentLabel = applyFairness ? 'Practitioners absorb (not applied)' : 'Practitioners absorb (ACTIVE)';
+    const fairLabel = applyFairness ? 'Venue reimburses (ACTIVE)' : 'Venue reimburses (not applied)';
+    document.getElementById('fairness-content').innerHTML = `
+      <table class="fair-table">
+        <tr><th>Who covers the shortfall</th><th>${currentLabel}</th><th>${fairLabel}</th></tr>
+        <tr><td>Sensorium (Pay It Forward)</td><td>${fmt(drawFromPIF)}</td><td>${fmt(drawFromPIF)}</td></tr>
+        <tr><td>Practitioners (pool reduction)</td><td>${fmt(drawFromPracPool)}</td><td>$0</td></tr>
+        <tr><td>Venue</td><td>$0</td><td>${fmt(drawFromPracPool)}</td></tr>
+        <tr class="pr-total"><td>Practitioner pool total</td><td>${fmt(practitionerPoolPreShortfall - drawFromPracPool)}</td><td>${fmt(practitionerPoolPreShortfall)}</td></tr>
+        <tr><td>Per-practitioner payout (of ${pracCount})</td><td>${fmt((practitionerPoolPreShortfall - drawFromPracPool)/pracCount)}</td><td class="delta">${fmt(perPracFair)} (+${fmt(perPracDelta)})</td></tr>
+      </table>
+      <div class="desc" style="margin-top:10px;">Sensorium already forfeited ${fmt(drawFromPIF)} of its own Pay It Forward to help cover the vendor-side shortfall. ${applyFairness ? `The checkbox above is applying the venue-reimburses scenario — every practitioner's payout is currently ${fmt(perPrac)}.` : `Check the box above to apply the venue-reimburses scenario and raise every practitioner's payout by ${fmt(perPracDelta)}.`}</div>
+    `;
+  } else {
+    fairnessPanel.style.display = 'none';
+  }
+
+  /* ---------------- RESULTS SUMMARY ---------------- */
+  let res = '';
+
+  res += `<div class="result-block">
+    <div class="result-title">Total Payout — Nonprofit Partners</div>
+    <div class="result-total">${fmt(totalNonprofit)}</div>
+    <ul class="result-sub-list">
+      <li><span>From ticket revenue</span><span class="amt">${fmt(nonprofitFromTicket)}</span></li>
+      <li><span>From vendor revenue</span><span class="amt">${fmt(nonprofitFromVendor)}</span></li>
+      ${npPartnerRows.map(p=>`<li><span>${p.name}</span><span class="amt">${fmt(perNpPartner)}</span></li>`).join('')}
+    </ul>
+  </div>`;
+
+  res += `<div class="result-block">
+    <div class="result-title">Total Payout — Venue &amp; Partner Splits</div>
+    <div class="result-total">${fmt(venueSplitsTotal)}</div>
+    <ul class="result-sub-list">
+      ${splitAmts.map(s=>`<li><span>${s.name} (${s.pct}%)</span><span class="amt">${fmt(s.amt)}</span></li>`).join('')}
+    </ul>
+  </div>`;
+
+  res += `<div class="result-block">
+    <div class="result-title">Total Payout — Practitioners</div>
+    <div class="result-total">${fmt(practitionerPool)}</div>
+    <ul class="result-sub-list">
+      <li><span>Ticket kickback deducted first</span><span class="amt">${fmt(kickbackTotal)}</span></li>
+      ${drawFromPracPool>0?`<li><span>${applyFairness ? 'Vendor shortfall reimbursed by venue (fairness scenario applied)' : 'Vendor shortfall deducted (bill venue) — see Fairness Scenario'}</span><span class="amt">${applyFairness?'$0':fmt(drawFromPracPool)}</span></li>`:''}
+      <li><span>Per practitioner (of ${pracCount})</span><span class="amt">${fmt(perPrac)}</span></li>
+    </ul>
+  </div>`;
+
+  res += `<div class="result-block">
+    <div class="result-title">Payout — Sensorium Pay It Forward</div>
+    <div class="result-total">${fmt(pifAmt + sensoriumNetVendor)}</div>
+    <ul class="result-sub-list">
+      <li><span>Ticket-side${shortfallAmount>0?` (would have been ${fmt(pifAmtOriginal)})`:''}</span><span class="amt">${fmt(pifAmt)}</span></li>
+      <li><span>Vendor-side</span><span class="amt">${fmt(sensoriumNetVendor)}</span></li>
+    </ul>
+  </div>`;
+
+  res += `<div class="result-block">
+    <div class="result-title">Payout — Equitable Partner Fund</div>
+    <div class="result-total">${fmt(epfAmt)}</div>
+    ${shortfallAmount>0?'<ul class="result-sub-list"><li><span>No vendor-side profit remained after ops this event</span><span class="amt">$0</span></li></ul>':''}
+  </div>`;
+
+  res += `<div class="result-block">
+    <div class="result-title">Total Net (Sensorium, combined)</div>
+    <div class="result-total">${fmt(totalNetSensorium)}</div>
+  </div>`;
+
+  res += `<div class="result-block">
+    <div class="result-title">Total Gross <span style="font-size:12px;color:rgba(244,239,228,0.5);">(collected only — excludes promo discounts)</span></div>
+    <div class="result-total">${fmt(totalGrossCollected)}</div>
+    <ul class="result-sub-list">
+      <li><span>Ticket gross (after promo, before fees)</span><span class="amt">${fmt(netTicketBeforeFees)}</span></li>
+      <li><span>Vendor + sponsor gross</span><span class="amt">${fmt(vendorSideGross)}</span></li>
+    </ul>
+  </div>`;
+
+  res += `<div class="result-block">
+    <div class="result-title">Quarterly Projection <span style="font-size:12px;color:rgba(244,239,228,0.5);">(this event × 3)</span></div>
+    <div class="result-total">${fmt(Math.max(totalNetSensorium,0)*3)}</div>
+    <ul class="result-sub-list">
+      <li><span>Projected gross (×3)</span><span class="amt">${fmt(totalGrossCollected*3)}</span></li>
+    </ul>
+  </div>`;
+
+  document.getElementById('results-summary').innerHTML = res;
+
+  /* ---------------- PRINT REPORT ---------------- */
+  buildPrintReport({
+    tierRows, promoRows, npPartnerRows, splitRows, costRows,
+    totalTickets, grossTicket, promoDiscount, feePct, ticketFees, netTicketBeforeFees, netTicketAfterFees,
+    ticketOpsTotal, vendorOpsTotal, grandOpsTotal,
+    npTicketPct, nonprofitFromTicket, splitAmts, venueSplitsTotal, pifPct, pifAmtOriginal, pifAmt,
+    kickbackPrice, kickbackCount, kickbackTotal,
+    practitionerPoolPreShortfall, practitionerPool, pracCount, perPrac, perPracFair,
+    vendorFlat, revShareTotal, vendorGross, sponsorTotal, vendorSideGross, totalVendorCount,
+    npVendorPct, epfPct, nonprofitFromVendor, epfAmt, sensoriumNetVendor,
+    shortfallAmount, drawFromPIF, drawFromPracPool, applyFairness,
+    totalNonprofit, npPartnerCount, perNpPartner,
+    totalNetSensorium, totalGrossCollected, marginPct
+  });
+}
+
+function buildPrintReport(d){
+  const row = (label, val) => `<tr><td>${label}</td><td style="text-align:right;">${fmt(val)}</td></tr>`;
+  const section = (title, inner) => `<div class="pr-section"><div class="pr-h">${title}</div>${inner}</div>`;
+
+  let html = `<h1 style="font-family:Georgia,serif;color:#2e1a47;">Sensorium — Revenue &amp; Profit Report</h1>
+  <p style="color:#555;font-size:12px;">Generated ${new Date().toLocaleString()}</p>`;
+
+  html += section('Ticket Tiers', `<table>
+    <tr><th>Tier</th><th style="text-align:right;">Price</th><th style="text-align:right;">Count</th><th style="text-align:right;">Subtotal</th></tr>
+    ${d.tierRows.map(r=>`<tr><td>${r.name}</td><td style="text-align:right;">${fmt(r.price)}</td><td style="text-align:right;">${r.count}</td><td style="text-align:right;">${fmt(r.price*r.count)}</td></tr>`).join('')}
+    <tr class="pr-total"><td colspan="3">Total ticket tiers (gross)</td><td style="text-align:right;">${fmt(d.grossTicket)}</td></tr>
+  </table>`);
+
+  html += section('Promo Codes', `<table>
+    <tr><th>Promo</th><th style="text-align:right;">$ off</th><th style="text-align:right;">Count</th><th style="text-align:right;">Total</th></tr>
+    ${d.promoRows.map(r=>`<tr><td>${r.name}</td><td style="text-align:right;">${fmt(r.amount)}</td><td style="text-align:right;">${r.count}</td><td style="text-align:right;">${fmt(r.amount*r.count)}</td></tr>`).join('')}
+    <tr class="pr-total"><td colspan="3">Total promo discounts (not collected)</td><td style="text-align:right;">${fmt(d.promoDiscount)}</td></tr>
+  </table>`);
+
+  html += section('Ticket Revenue Summary', `<table>
+    ${row('Gross ticket revenue', d.grossTicket)}
+    ${row('− Promo discounts (not collected)', -d.promoDiscount)}
+    ${row(`− Processing fees (${(d.feePct*100).toFixed(1)}%)`, -d.ticketFees)}
+    ${row('− Ticket-side operating costs', -d.ticketOpsTotal)}
+    <tr class="pr-total">${row('Ticket revenue base (for splits)', d.netTicketAfterFees - d.ticketOpsTotal).replace('<tr>','').replace('</tr>','')}</tr>
+    <tr class="pr-total">${row('Total ticket revenue (collected, net of promo + fees)', d.netTicketAfterFees).replace('<tr>','').replace('</tr>','')}</tr>
+  </table>`);
+
+  html += section('Ticket-Side Splits', `<table>
+    ${row(`Nonprofit Partners (${d.npTicketPct}%)`, -d.nonprofitFromTicket)}
+    ${d.splitAmts.map(s=>row(`${s.name} (${s.pct}%)`, -s.amt)).join('')}
+    ${row(`Sensorium Pay It Forward (${d.pifPct}%)${d.shortfallAmount>0?' — reduced for vendor shortfall':''}`, -d.pifAmt)}
+    ${row('Practitioner ticket kickback', -d.kickbackTotal)}
+    <tr class="pr-total">${row('Practitioner pool (final)', d.practitionerPool).replace('<tr>','').replace('</tr>','')}</tr>
+    ${row(`Per practitioner (of ${d.pracCount})`, d.perPrac)}
+  </table>`);
+
+  html += section('Teaching Practitioners', `<table>
+    <tr><th>Practitioner</th><th>Type</th><th>Primary Modality</th><th style="text-align:right;">Payout</th></tr>
+    ${pracEntries.map(p=>`<tr><td>${p.name}</td><td>${p.practitionerType||'—'}</td><td>${p.primaryModality||'—'}</td><td style="text-align:right;">${fmt(d.perPrac)}</td></tr>`).join('') || '<tr><td colspan="4">No practitioners added</td></tr>'}
+    <tr class="pr-total"><td colspan="3">Practitioner pool · ${pracEntries.length} activator${pracEntries.length===1?'':'s'}</td><td style="text-align:right;">${fmt(d.practitionerPool)}</td></tr>
+  </table>`);
+
+  html += section('Nonprofit Partners', `<table>
+    <tr><th>Partner</th><th style="text-align:right;">Payout</th></tr>
+    ${d.npPartnerRows.map(p=>`<tr><td>${p.name}</td><td style="text-align:right;">${fmt(d.perNpPartner)}</td></tr>`).join('')}
+    <tr class="pr-total"><td>Total nonprofit payout (ticket + vendor)</td><td style="text-align:right;">${fmt(d.totalNonprofit)}</td></tr>
+  </table>`);
+
+  html += section('Selected Vendors', `<table>
+    <tr><th>Vendor</th><th>Tier</th><th>Type</th><th>Booth</th><th style="text-align:right;">Rate</th></tr>
+    ${vendorEntries.map(v=>`<tr><td>${v.name}</td><td>${v.tier||'—'}</td><td>${v.vendorType||'—'}</td><td>${v.boothSize||'—'}</td><td style="text-align:right;">${fmt(v.rate)}</td></tr>`).join('') || '<tr><td colspan="5">No vendors added</td></tr>'}
+    <tr class="pr-total"><td colspan="4">Total vendor tiers · ${vendorEntries.length} vendor${vendorEntries.length===1?'':'s'}</td><td style="text-align:right;">${fmt(d.vendorFlat)}</td></tr>
+  </table>`);
+
+  html += section('Revenue-Share Vendors &amp; Sponsors', `<table>
+    ${row('Rev-share vendors total', d.revShareTotal)}
+    ${row('Sponsor revenue total', d.sponsorTotal)}
+    <tr class="pr-total">${row('Grand total vendor & sponsorship revenue', d.vendorSideGross).replace('<tr>','').replace('</tr>','')}</tr>
+  </table>`);
+
+  html += section('Vendor-Side Splits', `<table>
+    ${row('Vendor-side operating costs', -d.vendorOpsTotal)}
+    ${d.shortfallAmount>0 ? row('Shortfall drawn from ticket Pay It Forward', d.drawFromPIF) + (d.drawFromPracPool>0?row('Shortfall drawn from practitioner pool (bill venue)', d.drawFromPracPool):'') : ''}
+    ${row(`Nonprofit Partners (${d.npVendorPct}%)`, -d.nonprofitFromVendor)}
+    ${row(`Equitable Partner Fund (${d.epfPct}%)`, -d.epfAmt)}
+    <tr class="pr-total">${row('Sensorium Pay It Forward (vendor-side)', d.sensoriumNetVendor).replace('<tr>','').replace('</tr>','')}</tr>
+  </table>`);
+
+  html += section('Operating Costs', `<table>
+    <tr><th>Item</th><th style="text-align:right;">Amount</th><th>Ticket</th><th>Vendor</th></tr>
+    ${costRows.map(r=>`<tr><td>${r.name}</td><td style="text-align:right;">${fmt(r.amount)}</td><td>${r.ticket?'✓':''}</td><td>${r.vendor?'✓':''}</td></tr>`).join('')}
+    <tr class="pr-total"><td>Total ticket-side ops</td><td style="text-align:right;">${fmt(d.ticketOpsTotal)}</td><td colspan="2"></td></tr>
+    <tr class="pr-total"><td>Total vendor-side ops</td><td style="text-align:right;">${fmt(d.vendorOpsTotal)}</td><td colspan="2"></td></tr>
+    <tr class="pr-total"><td>Grand total operating costs</td><td style="text-align:right;">${fmt(d.grandOpsTotal)}</td><td colspan="2"></td></tr>
+  </table>`);
+
+  html += section('Ticket-Side Waterfall', `<table>
+    <tr><th>Step</th><th style="text-align:right;">Amount</th></tr>
+    <tr><td>① Gross ticket revenue (${d.totalTickets} tickets)</td><td style="text-align:right;">${fmt(d.grossTicket)}</td></tr>
+    <tr><td>② Promo discounts (not collected)</td><td style="text-align:right;">${fmt(-d.promoDiscount)}</td></tr>
+    <tr><td>③ Processing fees</td><td style="text-align:right;">${fmt(-d.ticketFees)}</td></tr>
+    <tr><td>④ Ticket-side operating costs</td><td style="text-align:right;">${fmt(-d.ticketOpsTotal)}</td></tr>
+    <tr><td>⑤ Nonprofit Partners (${d.npTicketPct}%)</td><td style="text-align:right;">${fmt(-d.nonprofitFromTicket)}</td></tr>
+    ${d.splitAmts.map(s=>`<tr><td>⑥ ${s.name} (${s.pct}%)</td><td style="text-align:right;">${fmt(-s.amt)}</td></tr>`).join('')}
+    <tr><td>⑦ Sensorium Pay It Forward (${d.pifPct}%)${d.shortfallAmount>0?` — would have been ${fmt(d.pifAmtOriginal)}`:''}</td><td style="text-align:right;">${fmt(-d.pifAmt)}</td></tr>
+    <tr><td>⑧ Practitioner ticket kickback (${d.kickbackCount} × ${fmt(d.kickbackPrice)})</td><td style="text-align:right;">${fmt(-d.kickbackTotal)}</td></tr>
+    <tr class="pr-total"><td>⑨ Practitioner pool (final)</td><td style="text-align:right;">${fmt(d.practitionerPool)}</td></tr>
+  </table>`);
+
+  html += section('Vendor-Side Waterfall', `<table>
+    <tr><th>Step</th><th style="text-align:right;">Amount</th></tr>
+    <tr><td>① Vendor tier + rev-share revenue (${d.totalVendorCount} vendors)</td><td style="text-align:right;">${fmt(d.vendorGross)}</td></tr>
+    <tr><td>② Sponsor revenue</td><td style="text-align:right;">${fmt(d.sponsorTotal)}</td></tr>
+    <tr><td>③ Vendor-side operating costs</td><td style="text-align:right;">${fmt(-d.vendorOpsTotal)}</td></tr>
+    ${d.shortfallAmount>0?`<tr><td>④ Shortfall drawn from ticket Pay It Forward</td><td style="text-align:right;">${fmt(d.drawFromPIF)}</td></tr>`:''}
+    ${d.drawFromPracPool>0?`<tr><td>⑤ Shortfall ${d.applyFairness?'reimbursed by venue':'drawn from practitioner pool (bill venue)'}</td><td style="text-align:right;">${fmt(d.drawFromPracPool)}</td></tr>`:''}
+    <tr><td>⑥ Nonprofit Partners (${d.npVendorPct}%)${d.shortfallAmount>0?' — no profit remained':''}</td><td style="text-align:right;">${fmt(-d.nonprofitFromVendor)}</td></tr>
+    <tr><td>⑦ Equitable Partner Fund (${d.epfPct}%)${d.shortfallAmount>0?' — no profit remained':''}</td><td style="text-align:right;">${fmt(-d.epfAmt)}</td></tr>
+    <tr class="pr-total"><td>⑧ Sensorium Pay It Forward (vendor-side)</td><td style="text-align:right;">${fmt(d.sensoriumNetVendor)}</td></tr>
+  </table>`);
+
+  if(d.shortfallAmount > 0 && d.drawFromPracPool > 0){
+    const statusNote = d.applyFairness ? 'APPLIED — reflected in all totals above' : 'NOT applied — practitioner pool currently absorbs this cost';
+    html += section(`Venue Fairness Scenario (${statusNote})`, `<table>
+      <tr><th>Who covers the shortfall</th><th style="text-align:right;">Practitioners absorb</th><th style="text-align:right;">Venue reimburses</th></tr>
+      <tr><td>Sensorium (Pay It Forward)</td><td style="text-align:right;">${fmt(d.drawFromPIF)}</td><td style="text-align:right;">${fmt(d.drawFromPIF)}</td></tr>
+      <tr><td>Practitioners (pool reduction)</td><td style="text-align:right;">${fmt(d.drawFromPracPool)}</td><td style="text-align:right;">$0</td></tr>
+      <tr><td>Venue</td><td style="text-align:right;">$0</td><td style="text-align:right;">${fmt(d.drawFromPracPool)}</td></tr>
+      <tr class="pr-total"><td>Per-practitioner payout</td><td style="text-align:right;">${fmt(d.practitionerPoolPreShortfall!==undefined ? (d.practitionerPoolPreShortfall-d.drawFromPracPool)/d.pracCount : 0)}</td><td style="text-align:right;">${fmt(d.perPracFair)}</td></tr>
+    </table>`);
+  }
+
+  html += section('Results Summary', `<table>
+    ${row('Total Payout — Nonprofit Partners', d.totalNonprofit)}
+    ${row('Total Payout — Venue & Partner Splits', d.venueSplitsTotal)}
+    ${row('Total Payout — Practitioners', d.practitionerPool)}
+    ${row('Payout — Sensorium Pay It Forward (combined)', d.pifAmt + d.sensoriumNetVendor)}
+    ${row('Payout — Equitable Partner Fund', d.epfAmt)}
+    <tr class="pr-total">${row('Total Net (Sensorium, combined)', d.totalNetSensorium).replace('<tr>','').replace('</tr>','')}</tr>
+    <tr class="pr-total">${row('Total Gross (collected only)', d.totalGrossCollected).replace('<tr>','').replace('</tr>','')}</tr>
+    ${row('Quarterly Projection — Net (×3)', Math.max(d.totalNetSensorium,0)*3)}
+    ${row('Quarterly Projection — Gross (×3)', d.totalGrossCollected*3)}
+  </table>`);
+
+  document.getElementById('print-report').innerHTML = html;
+}
+
+renderTierRows();
+renderPromoRows();
+renderNpPartnerRows();
+renderSplitRows();
+renderCostRows();
+renderVendorEntryRows();
+renderPracEntryRows();
+fetchDirectory();
+calc();
+</script>
+
+</body>
+</html>
